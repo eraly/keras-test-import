@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ~ Copyright (c) 2015-2019 Skymind, Inc.
   ~
@@ -14,280 +15,143 @@
   ~ SPDX-License-Identifier: Apache-2.0
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>deeplearning4j-examples-parent</artifactId>
-    <version>1.0.0-beta5</version>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
 
-    <name>DeepLearning4j Examples Parent</name>
-    <description>Examples of training different data sets</description>
+    <!-- Group-ID, artifact ID and version of the project. You can modify these as you want -->
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-examples</artifactId>
+    <version>1.0.0-beta5</version>
+
+    <!-- Properties Section. Change DL4J and ND4J versions here, if required -->
     <properties>
-        <!-- Change the nd4j.backend property to nd4j-cuda-9.2-platform,nd4j-cuda-10.0-platform or nd4j-cuda-10.1-platform to use CUDA GPUs -->
-        <nd4j.backend>nd4j-native-platform</nd4j.backend>
-        <!--<nd4j.backend>nd4j-cuda-10.1-platform</nd4j.backend>-->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <shadedClassifier>bin</shadedClassifier>
-
-
+        <dl4j.version>1.0.0-beta6</dl4j.version>
+        <nd4j.version>1.0.0-beta6</nd4j.version>
+        <logback.version>1.2.3</logback.version>
         <java.version>1.8</java.version>
-        <nd4j.version>1.0.0-beta5</nd4j.version>
-        <dl4j.version>1.0.0-beta5</dl4j.version>
-        <datavec.version>1.0.0-beta5</datavec.version>
-        <arbiter.version>1.0.0-beta5</arbiter.version>
-        <rl4j.version>1.0.0-beta5</rl4j.version>
-
-        <!-- Scala binary version: DL4J's Spark and UI functionality are released with both Scala 2.10 and 2.11 support -->
-        <scala.binary.version>2.11</scala.binary.version>
-        <spark.version>2.4.3</spark.version>
-
-        <hadoop.version>2.2.0</hadoop.version>  <!-- Hadoop version used by Spark 1.6.3 and 2.2.1 (and likely others) -->
-        <guava.version>19.0</guava.version>
-        <logback.version>1.1.7</logback.version>
-        <jfreechart.version>1.0.13</jfreechart.version>
-        <jcommon.version>1.0.23</jcommon.version>
-        <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
-        <exec-maven-plugin.version>1.4.0</exec-maven-plugin.version>
-        <maven.minimum.version>3.3.1</maven.minimum.version>
-        <javafx.version>2.2.3</javafx.version>
-        <javafx.runtime.lib.jar>${env.JAVAFX_HOME}/jfxrt.jar</javafx.runtime.lib.jar>
-        <aws.sdk.version>1.11.109</aws.sdk.version>
-        <jackson.version>2.5.1</jackson.version>
-        <scala.plugin.version>3.2.2</scala.plugin.version>
     </properties>
 
-    <modules>
-        <module>dl4j-examples</module>
-    </modules>
 
-    <!-- Maven Enforcer: Ensures user has an up to date version of Maven before building -->
+    <dependencies>
+        <!-- deeplearning4j-core: contains main functionality and neural networks -->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+
+        <!--
+        ND4J backend: every project needs one of these. The backend defines the hardware on which network training
+        will occur. "nd4j-native-platform" is for CPUs only (for running on all operating systems).
+        -->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
+        </dependency>
+
+        <!-- CUDA: to use GPU for training (CUDA) instead of CPU, uncomment this, and remove nd4j-native-platform -->
+        <!-- Requires CUDA to be installed to use. Change the version (8.0, 9.0, 9.1) to change the CUDA version -->
+        <!--
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-cuda-9.2-platform</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+        -->
+
+        <!-- Optional, but recommended: if you use CUDA, also use CuDNN. To use this, CuDNN must also be installed -->
+        <!-- See: https://deeplearning4j.org/cudnn -->
+        <!--
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-cuda-9.2</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+        -->
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+    </dependencies>
+
+
+
     <build>
         <plugins>
+            <!-- Maven compiler plugin: compile for Java 8 -->
             <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.0.1</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
+
+            <!--
+            Maven shade plugin configuration: this is required so that if you build a single JAR file (an "uber-jar")
+            it will contain all the required native libraries, and the backends will work correctly.
+            Used for example when running the following commants
+
+            mvn package
+            cd target
+            java -cp deeplearning4j-examples-1.0.0-beta-bin.jar org.deeplearning4j.LenetMnistExample
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>bin</shadedClassifierName>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>org/datanucleus/**</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+
                 <executions>
                     <execution>
-                        <id>enforce-default</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>enforce</goal>
+                            <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[${maven.minimum.version},)</version>
-                                    <message>********** Minimum Maven Version is ${maven.minimum.version}. Please upgrade Maven before continuing (run "mvn --version" to check). **********</message>
-                                </requireMavenVersion>
-                            </rules>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>reference.conf</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Automated Code Formatting -->
-            <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.0.0</version>
-                <configuration>
-                    <configFile>${session.executionRootDirectory}/contrib/formatter.xml</configFile>
-                    <directories>
-                        <directory>dl4j-examples</directory>
-                        <directory>dl4j-spark-examples</directory>
-                        <directory>datavec-examples</directory>
-                        <directory>dl4j-cuda-specific-examples</directory>
-                        <directory>nd4j-examples</directory>
-                        <directory>rl4j-examples</directory>
-                        <directory>arbiter-examples</directory>
-                        <directory>lstm-hdfs</directory>
-                    </directories>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.lewisd</groupId>
-                <artifactId>lint-maven-plugin</artifactId>
-                <version>0.0.11</version>
-                <configuration>
-                    <failOnViolation>true</failOnViolation>
-                    <onlyRunRules>
-                        <rule>DuplicateDep</rule>
-                        <rule>RedundantPluginVersion</rule>
-                        <!-- Rules incompatible with Java 9
-                        <rule>VersionProp</rule>
-                        <rule>DotVersionProperty</rule> -->
-                    </onlyRunRules>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>pom-lint</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
-
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>com.lewisd</groupId>
-                                        <artifactId>lint-maven-plugin</artifactId>
-                                        <versionRange>[0.0.11,)</versionRange>
-                                        <goals>
-                                            <goal>check</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore/>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
-
     </build>
-
-    <profiles>
-        <profile>
-            <id>linux</id>
-            <activation>
-                <os><name>linux</name></os>
-            </activation>
-            <properties>
-                <os.name>linux</os.name>
-            </properties>
-            <modules>
-                <module>dl4j-cuda-specific-examples</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>windows</id>
-            <activation>
-                <os><family>windows</family></os>
-            </activation>
-            <properties>
-                <os.name>windows</os.name>
-            </properties>
-            <modules>
-                <module>dl4j-cuda-specific-examples</module>
-            </modules>
-        </profile>
-
-
-        <profile>
-            <id>OpenJFX-11</id>
-            <activation>
-                <jdk>11</jdk>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-controls</artifactId>
-                    <version>11</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-swing</artifactId>
-                    <version>11</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>OpenJFX-12</id>
-            <activation>
-                <jdk>12</jdk>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-controls</artifactId>
-                    <version>12</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-swing</artifactId>
-                    <version>12</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>OpenJFX</id>
-            <activation>
-                <jdk>1.7</jdk>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-enforcer-plugin</artifactId>
-                        <version>1.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>enforce-default</id>
-                                <goals>
-                                    <goal>enforce</goal>
-                                </goals>
-                                <configuration>
-                                    <rules>
-                                        <requireProperty>
-                                            <property>env.JAVAFX_HOME</property>
-                                            <message>You must set the environment variable JAVAFX_HOME to the installation directory of the JavaFX 2.0 SDK! (with Oracle JDK1.7, $JRE_HOME/lib/jfxrt.jar)</message>
-                                        </requireProperty>
-
-                                    </rules>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-install-plugin</artifactId>
-                        <version>2.5.2</version>
-                        <executions>
-                            <execution>
-                                <id>install-external</id>
-                                <phase>clean</phase>
-                                <configuration>
-                                    <file>${javafx.runtime.lib.jar}</file>
-                                    <repositoryLayout>default</repositoryLayout>
-                                    <groupId>com.oracle</groupId>
-                                    <artifactId>javafx</artifactId>
-                                    <version>${javafx.version}</version>
-                                    <packaging>jar</packaging>
-                                    <generatePom>true</generatePom>
-                                </configuration>
-                                <goals>
-                                    <goal>install-file</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>
